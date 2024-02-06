@@ -1,5 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+
+var logger = Logger();
 
 class SignIn extends StatefulWidget {
   const SignIn({Key? key}) : super(key: key);
@@ -31,7 +34,7 @@ class _SignInState extends State<SignIn> {
                       keyboardType: TextInputType.text,
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
-                        hintText: "Username",
+                        hintText: "Email",
                         filled: true,
                         fillColor: const Color(0xFFD3D3D3),
                         border: OutlineInputBorder(
@@ -56,6 +59,8 @@ class _SignInState extends State<SignIn> {
                     ),
                     const SizedBox(height: 18),
                     InkWell(
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
                       onTap: () {
                         setState(() {
                           isLoading = true;
@@ -74,20 +79,23 @@ class _SignInState extends State<SignIn> {
                           color: Colors.black,
                           borderRadius: BorderRadius.circular(25)
                         ),
-                        child: isLoading
-                          ? CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          )
-                          : const Center(
-                          child: Text(
-                            "Sign in",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold
+                        child: Center(
+                          child: isLoading
+                            ? const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
                             )
-                          )
-                        )
+                            : const Text(
+                              "Sign in",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold
+                              )
+                            )
+                        ),
                       ),
                     ),
                   ],
@@ -107,7 +115,7 @@ class _SignInState extends State<SignIn> {
         password: passwordController.text.trim(),
       );
     } catch (error) {
-      print("Error signing in:\n$error");
+      logger.e("Error signing in:\n$error");
     }
   }
 }
