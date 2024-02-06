@@ -11,6 +11,7 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +57,14 @@ class _SignInState extends State<SignIn> {
                     const SizedBox(height: 18),
                     InkWell(
                       onTap: () {
-
+                        setState(() {
+                          isLoading = true;
+                        });
+                        signIn().then((_) {
+                          setState(() {
+                            isLoading = false;
+                          });
+                        });
                       },
                       child: Container(
                         width: constraints.maxWidth,
@@ -66,7 +74,11 @@ class _SignInState extends State<SignIn> {
                           color: Colors.black,
                           borderRadius: BorderRadius.circular(25)
                         ),
-                        child: const Center(
+                        child: isLoading
+                          ? CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          )
+                          : const Center(
                           child: Text(
                             "Sign in",
                             style: TextStyle(
@@ -74,8 +86,8 @@ class _SignInState extends State<SignIn> {
                               fontSize: 16,
                               fontWeight: FontWeight.bold
                             )
-                          ),
-                        ),
+                          )
+                        )
                       ),
                     ),
                   ],
@@ -89,9 +101,13 @@ class _SignInState extends State<SignIn> {
   }
 
   Future signIn() async {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: emailController.text.trim(),
-      password: passwordController.text.trim()
-    );
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+    } catch (error) {
+      print("Error signing in:\n$error");
+    }
   }
 }
