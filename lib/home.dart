@@ -24,9 +24,13 @@ class Home extends StatelessWidget {
           )
         ],
       ),
-      body: const SafeArea(
+      body:SafeArea(
         child: Center(
-          child: Text("Yo!"),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return const Text("Yo!");
+            }
+          ),
         )
       ),
     );

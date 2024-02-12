@@ -6,16 +6,16 @@ import 'package:logger/logger.dart';
 
 var logger = Logger();
 
-class SignIn extends StatefulWidget {
+class SignUp extends StatefulWidget {
   final VoidCallback onClickedSignUp;
 
-  const SignIn({Key? key, required this.onClickedSignUp}) : super(key: key);
+  const SignUp({Key? key, required this.onClickedSignUp}) : super(key: key);
 
   @override
-  State<SignIn> createState() => _SignInState();
+  State<SignUp> createState() => _SignUpState();
 }
 
-class _SignInState extends State<SignIn> {
+class _SignUpState extends State<SignUp> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool isLoading = false;
@@ -69,7 +69,7 @@ class _SignInState extends State<SignIn> {
                         setState(() {
                           isLoading = true;
                         });
-                        signIn().then((_) {
+                        signUp().then((_) {
                           setState(() {
                             isLoading = false;
                           });
@@ -92,7 +92,7 @@ class _SignInState extends State<SignIn> {
                               ),
                             )
                             : const Text(
-                              "Sign In",
+                              "Sign Up",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -105,16 +105,16 @@ class _SignInState extends State<SignIn> {
                     const SizedBox(height: 15),
                     RichText(
                       text: TextSpan(
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Color(0xFF000000)
                         ),
-                        text: "Don't have an account? ",
+                        text: "Already have an account? ",
                         children: [
                           TextSpan(
                             recognizer: TapGestureRecognizer()
                             ..onTap = widget.onClickedSignUp,
-                            text: "Sign Up",
-                            style: TextStyle(
+                            text: "Log In",
+                            style: const TextStyle(
                               decoration: TextDecoration.underline
                             )
                           )
@@ -131,15 +131,15 @@ class _SignInState extends State<SignIn> {
     );
   }
 
-  Future signIn() async {
+  Future signUp() async {
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
     } on FirebaseAuthException catch (error) {
       _showDialog();
-      logger.e("Error signing in:\n$error");
+      logger.e("Error signing up in:\n$error");
     }
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
   }
