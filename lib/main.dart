@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:learning_firebase/auth_screen.dart';
 import 'package:learning_firebase/firebase_options.dart';
-import 'package:learning_firebase/home.dart';
 import 'package:learning_firebase/utils.dart';
+import 'package:learning_firebase/verify_email_screen.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
@@ -38,13 +38,7 @@ class LearnFirebase extends StatelessWidget {
                 ),
               );
             } else if (snapshot.hasData) {
-              return const Home();
-            } else if (snapshot.hasError) {
-                return const Dialog(
-                  child: Center(
-                    child: Text("Dialog"),
-                  ),
-                );
+              return const VerifyEmailScreen();
             } else {
               return const AuthScreen();
             }
