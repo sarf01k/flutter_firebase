@@ -39,6 +39,7 @@ dependencies:
   firebase_auth: ^4.17.3
   cloud_firestore: ^4.15.3
   logger: ^2.0.2+1
+  email_validator: ^2.1.17
 
 dev_dependencies:
   flutter_test:

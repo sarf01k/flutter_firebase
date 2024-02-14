@@ -1,33 +1,37 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:learning_firebase/forgot_password.dart';
+import 'package:learning_firebase/home.dart';
 import 'package:learning_firebase/main.dart';
 import 'package:learning_firebase/utils.dart';
-import 'package:logger/logger.dart';
 
-var logger = Logger();
-
-class SignIn extends StatefulWidget {
-  final VoidCallback onClickedSignUp;
-
-  const SignIn({Key? key, required this.onClickedSignUp}) : super(key: key);
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  State<SignIn> createState() => _SignInState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _SignInState extends State<SignIn> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
-  final passwordController = TextEditingController();
   bool isLoading = false;
+
+  @override
+  void dispose() {
+    super.dispose();
+    emailController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        title: const Text(
+          "Reset Password"
+        ),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -39,6 +43,16 @@ class _SignInState extends State<SignIn> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      const Center(
+                        child: Text(
+                          "Enter your email to receive a password reset link",
+                          style: TextStyle(
+                            fontSize: 16,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       TextFormField(
                         controller: emailController,
                         keyboardType: TextInputType.text,
@@ -61,40 +75,6 @@ class _SignInState extends State<SignIn> {
                               ? "Enter a valid email"
                               : null,
                       ),
-                      const SizedBox(height: 15),
-                      TextFormField(
-                        controller: passwordController,
-                        keyboardType: TextInputType.text,
-                        textInputAction: TextInputAction.done,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          hintText: "Password",
-                          hintStyle: const TextStyle(
-                            fontWeight: FontWeight.w400
-                          ),
-                          filled: true,
-                          fillColor: const Color(0xFFD3D3D3),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(20)
-                          )
-                        ),
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) =>
-                            value != null && value.length < 6
-                              ? "Enter your password"
-                              : null,
-                      ),
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: GestureDetector(
-                          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ForgotPasswordScreen())),
-                          child: const Text(
-                            "Forgot password?",style: TextStyle(),
-                          ),
-                        ),
-                      ),
                       const SizedBox(height: 18),
                       InkWell(
                         splashColor: Colors.transparent,
@@ -103,7 +83,7 @@ class _SignInState extends State<SignIn> {
                           setState(() {
                             isLoading = true;
                           });
-                          signIn().then((_) {
+                          resetPassword().then((_) {
                             setState(() {
                               isLoading = false;
                             });
@@ -125,40 +105,28 @@ class _SignInState extends State<SignIn> {
                                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                 ),
                               )
-                              : const Text(
-                                "Sign In",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold
-                                )
+                              : const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.mail_outline, color: Colors.white,),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      "Register Password",
+                                      style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold
+                                    )
+                                  )
+                                ],
                               )
                           ),
                         ),
                       ),
-                      const SizedBox(height: 15),
-                      RichText(
-                        text: TextSpan(
-                          style: const TextStyle(
-                            color: Color(0xFF000000)
-                          ),
-                          text: "Don't have an account? ",
-                          children: [
-                            TextSpan(
-                              recognizer: TapGestureRecognizer()
-                              ..onTap = widget.onClickedSignUp,
-                              text: "Sign Up",
-                              style: const TextStyle(
-                                decoration: TextDecoration.underline
-                              )
-                            )
-                          ]
-                        )
-                      )
                     ],
-                  ),
+                  )
                 );
-              },
+              }
             ),
           ),
         ),
@@ -166,19 +134,26 @@ class _SignInState extends State<SignIn> {
     );
   }
 
-  Future signIn() async {
+  Future resetPassword() async {
     final isValid = formKey.currentState!.validate();
     if (!isValid) return;
+    final User? user = FirebaseAuth.instance.currentUser;
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+      if (user != null) {
+        await FirebaseAuth.instance.sendPasswordResetEmail(
+          email: emailController.text.trim()
+        );
+        Utils.showSnackBar("Password Reset Email Sent", Colors.green);
+      navigatorKey.currentState!.popUntil((route) => route.isFirst);
+      } else {
+        Utils.showSnackBar("Account with this email does not exist", Colors.red);
+      }
     } on FirebaseAuthException catch (e) {
-      Utils.showSnackBar(e.message, Colors.red);
       logger.e("Error signing in:\n$e");
+      logger.e(user);
+      Utils.showSnackBar(e.message, Colors.red);
+      Navigator.of(context).pop();
     }
-    navigatorKey.currentState!.popUntil((route) => route.isFirst);
   }
 }

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:learning_firebase/auth_screen.dart';
 import 'package:learning_firebase/firebase_options.dart';
-import 'package:learning_firebase/sign_in.dart';
 import 'package:learning_firebase/home.dart';
+import 'package:learning_firebase/utils.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
@@ -13,6 +13,7 @@ Future<void> main() async {
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: true,
+      scaffoldMessengerKey: Utils.messengerKey,
       navigatorKey: navigatorKey,
       home: const LearnFirebase(),
     )

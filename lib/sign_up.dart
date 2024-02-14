@@ -1,7 +1,9 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:learning_firebase/main.dart';
+import 'package:learning_firebase/utils.dart';
 import 'package:logger/logger.dart';
 
 var logger = Logger();
@@ -16,9 +18,18 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
+  final formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool isLoading = false;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,98 +41,119 @@ class _SignUpState extends State<SignUp> {
           child: Center(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextFormField(
-                      controller: emailController,
-                      keyboardType: TextInputType.text,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        hintText: "Email",
-                        filled: true,
-                        fillColor: const Color(0xFFD3D3D3),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.circular(20)
-                        )
-                      )
-                    ),
-                    const SizedBox(height: 15),
-                    TextFormField(
-                      controller: passwordController,
-                      keyboardType: TextInputType.text,
-                      textInputAction: TextInputAction.done,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                          hintText: "Password",
+                return Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextFormField(
+                        controller: emailController,
+                        keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.next,
+                        decoration: InputDecoration(
+                          hintText: "Email",
+                          hintStyle: const TextStyle(
+                            fontWeight: FontWeight.w400
+                          ),
                           filled: true,
                           fillColor: const Color(0xFFD3D3D3),
                           border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(20))),
-                    ),
-                    const SizedBox(height: 18),
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () {
-                        setState(() {
-                          isLoading = true;
-                        });
-                        signUp().then((_) {
-                          setState(() {
-                            isLoading = false;
-                          });
-                        });
-                      },
-                      child: Container(
-                        width: constraints.maxWidth,
-                        height: 55,
-                        margin: const EdgeInsets.symmetric(horizontal: 15),
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(25)
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(20)
+                          )
                         ),
-                        child: Center(
-                          child: isLoading
-                            ? const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                            : const Text(
-                              "Sign Up",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (email) =>
+                          email != null && !EmailValidator.validate(email)
+                            ? "Enter a valid email"
+                            : null,
+                      ),
+                      const SizedBox(height: 15),
+                      TextFormField(
+                        controller: passwordController,
+                        keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.done,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          hintText: "Password",
+                          hintStyle: const TextStyle(
+                            fontWeight: FontWeight.w400
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFFD3D3D3),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(20)
+                          )
+                        ),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (value) =>
+                          value != null && value.length < 6
+                            ? "Enter min. 6 characters"
+                            : null,
+                      ),
+                      const SizedBox(height: 18),
+                      InkWell(
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () {
+                          setState(() {
+                            isLoading = true;
+                          });
+                          signUp().then((_) {
+                            setState(() {
+                              isLoading = false;
+                            });
+                          });
+                        },
+                        child: Container(
+                          width: constraints.maxWidth,
+                          height: 55,
+                          margin: const EdgeInsets.symmetric(horizontal: 15),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(25)
+                          ),
+                          child: Center(
+                            child: isLoading
+                              ? const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
                               )
-                            )
+                              : const Text(
+                                "Sign Up",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold
+                                )
+                              )
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 15),
-                    RichText(
-                      text: TextSpan(
-                        style: const TextStyle(
-                          color: Color(0xFF000000)
-                        ),
-                        text: "Already have an account? ",
-                        children: [
-                          TextSpan(
-                            recognizer: TapGestureRecognizer()
-                            ..onTap = widget.onClickedSignUp,
-                            text: "Log In",
-                            style: const TextStyle(
-                              decoration: TextDecoration.underline
+                      const SizedBox(height: 15),
+                      RichText(
+                        text: TextSpan(
+                          style: const TextStyle(
+                            color: Color(0xFF000000)
+                          ),
+                          text: "Already have an account? ",
+                          children: [
+                            TextSpan(
+                              recognizer: TapGestureRecognizer()
+                              ..onTap = widget.onClickedSignUp,
+                              text: "Log In",
+                              style: const TextStyle(
+                                decoration: TextDecoration.underline
+                              )
                             )
-                          )
-                        ]
+                          ]
+                        )
                       )
-                    )
-                  ],
+                    ],
+                  ),
                 );
               },
             ),
@@ -132,36 +164,18 @@ class _SignUpState extends State<SignUp> {
   }
 
   Future signUp() async {
+    final isValid = formKey.currentState!.validate();
+    if (!isValid) return;
+
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-    } on FirebaseAuthException catch (error) {
-      _showDialog();
-      logger.e("Error signing up in:\n$error");
+    } on FirebaseAuthException catch (e) {
+      Utils.showSnackBar(e.message, Colors.red);
+      logger.e("Error signing up:\n$e");
     }
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
-  }
-
-  void _showDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Center(child: Text("Login Error")),
-          content: const Text("Failed to sign in. Please try again."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Center(child: Text("OK")),
-            ),
-          ],
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0))
-        );
-      },
-    );
   }
 }
