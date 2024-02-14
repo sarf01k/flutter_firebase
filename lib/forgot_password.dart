@@ -107,19 +107,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               )
                               : const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.mail_outline, color: Colors.white,),
-                                    SizedBox(width: 5),
-                                    Text(
-                                      "Register Password",
-                                      style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold
-                                    )
+                                children: [
+                                  Icon(Icons.mail_outline, color: Colors.white,),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    "Reset Password",
+                                    style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold
                                   )
-                                ],
-                              )
+                                )
+                              ],
+                            )
                           ),
                         ),
                       ),
